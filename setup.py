@@ -34,9 +34,11 @@ if os.environ.get("BANK_DATA_PATH") == "" or  os.environ.get("KIDNEY_DATA_PATH")
 print("Formatting data...")
 
 bank_ds = pd.read_csv(os.environ.get("BANK_DATA_PATH"), sep=",", header=None)
-bank_ds.columns = ["variance", "skewness", "curtosis", "entropy", "class"]
+bank_ds.columns = ["variance", "skewness", "curtosis", "entropy", "class"] # missing column names
 
 kidney_ds = pd.read_csv(os.environ.get("KIDNEY_DATA_PATH"), index_col=0)
+kidney_ds.rename(columns={"classification": "class"}, inplace=True)
+# consistent target names
 
 bank_ds.to_csv(os.path.join(data_folder, "bank.csv"), index=False)
 kidney_ds.to_csv(os.path.join(data_folder, "kidney.csv"), index=False)

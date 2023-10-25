@@ -1,3 +1,4 @@
 BANK_DATA_PATH= "" # path/to/bank/file
 KIDNEY_DATA_PATH= "" # path/to/kidney/disease/file
 DATA_FOLDER = ""
+DS = "bank.csv,kidney.csv"
