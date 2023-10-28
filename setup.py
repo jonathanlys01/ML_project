@@ -38,6 +38,10 @@ bank_ds.columns = ["variance", "skewness", "curtosis", "entropy", "class"] # mis
 
 kidney_ds = pd.read_csv(os.environ.get("KIDNEY_DATA_PATH"), index_col=0)
 kidney_ds.rename(columns={"classification": "class"}, inplace=True)
+kidney_ds["temp_class"] = kidney_ds["class"].map(lambda x : "ckd" if "not" not in x else "notckd")
+# for some reason, there were some instances of ckt\t instead of ckt
+kidney_ds["class"] = kidney_ds["temp_class"]
+kidney_ds = kidney_ds.drop("temp_class", axis=1)
 # consistent target names
 
 bank_ds.to_csv(os.path.join(data_folder, "bank.csv"), index=False)
