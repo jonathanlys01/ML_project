@@ -7,7 +7,18 @@ from sklearn.preprocessing import StandardScaler
 load_dotenv()
 
 def int_encoding(df, columns):
-    # columns: list (or str for one column) of column names to be encoded
+    """
+    Encode categorical variables as integers
+
+    Parameters
+
+    df: pandas.DataFrame
+    columns: list (or str for one column) of column names to be encoded
+
+    Returns
+
+    df: pandas.DataFrame with encoded columns (original columns are not modified, a copy is returned)
+    """
     temp = df.copy()
     if isinstance(columns, str):    
         columns = [columns]
@@ -16,17 +27,47 @@ def int_encoding(df, columns):
         temp[column] = temp[column].map(dict(zip(temp[column].unique(), range(length))))
     return temp
 
-def fill_na(df,columns,strategy="most"):
+def fill_na(df,columns,strategy="median"):
+    """
+    Fill missing values in columns with a given strategy
+
+    Parameters
+
+    df: pandas.DataFrame
+    columns: list (or str for one column) of column names to be encoded
+    strategy: str, one of "most", "mean", "median", "zero" : strategy to fill missing values
+    """
     temp = df.copy()
     for column in columns:
         if strategy=="most":
             most = temp[column].value_counts().index[0]
             temp[column] = temp[column].fillna(most)
+        elif strategy=="mean": # warning : not recommended for one hot encoded categorical variables
+            mean = np.mean(temp[column])
+            temp[column] = temp[column].fillna(mean)
+        elif strategy=="median": 
+            median = np.median(temp[column])
+            temp[column] = temp[column].fillna(median)
+        elif strategy=="zero":
+            temp[column] = temp[column].fillna(0)
         else:
             raise NotImplementedError(f"{strategy} not a valid strategy)")
     return temp
 
 def train_test_split(df, train_split=0.7):
+    """
+    Split a dataframe into train and test sets
+
+    Parameters
+
+    df: pandas.DataFrame
+    train_split: float, proportion of the dataset to be used for training
+
+    Returns
+
+    train_df: pandas.DataFrame, train set
+    test_df: pandas.DataFrame, test set
+    """
     assert 0<=train_split<=1
 
     indices = np.array(df.index)
@@ -41,6 +82,20 @@ def train_test_split(df, train_split=0.7):
     return train_df, test_df
 
 def normalize(df, scaler):
+    """
+    Normalize a dataframe using a given scaler
+
+    Parameters
+
+    df: pandas.DataFrame
+    scaler: sklearn.preprocessing scaler
+
+    Returns
+
+    df: pandas.DataFrame, normalized dataframe
+    scaler: sklearn.preprocessing scaler, fitted scaler
+    for example, a StandardScaler will have fitted mean and standard deviation (scaler.mean_, scaler.scale)
+    """
     temp = df.copy()
     temp = temp.drop(columns=["class"])
     
@@ -93,10 +148,5 @@ def main():
         print("mean" ,scaler.mean_)
         print("scale", scaler.scale_)
 
-
-
-
-
-        
 if __name__ == "__main__":
     main()

@@ -11,6 +11,16 @@ from sklearn.datasets import make_blobs
 
 
 class BaseMLP(torch.nn.Module):
+    """
+    Base Module class for MLPs
+    
+    Parameters
+
+    input_size: int, size of the input layer
+    output_size: int, size of the output layer
+    architecture: list of int, sizes of the hidden layers
+    p: float, dropout probability
+    """
     def __init__(self, input_size, output_size, architecture, p, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
@@ -45,10 +55,21 @@ class BaseMLP(torch.nn.Module):
 
         return F.sigmoid(x)
         
-            
-        
 
 class TorchMLP(BaseEstimator, ClassifierMixin):
+    """
+    MLP implemented with PyTorch, to be used with sklearn pipelines
+
+    Parameters
+
+    config: dict, contains the following keys:
+        n_epochs: int, number of epochs
+        bs: int, batch size
+        opt: str, one of "adam", "sgd"
+        lr: float, learning rate
+        architecture: list of int, sizes of the hidden layers
+        p: float, dropout probability
+    """
 
     def __init__(self, config):
         self.model = None
@@ -57,6 +78,7 @@ class TorchMLP(BaseEstimator, ClassifierMixin):
             self.device = torch.device("mps")
         elif torch.cuda.is_available():
             self.device = torch.device("cuda:0")"""
+        # TODO : add working mps support
         
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
