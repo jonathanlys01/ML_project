@@ -175,7 +175,7 @@ def main():
 
     myMLP.fit(X, y)
 
-    print(print(100*np.mean((np.round(myMLP.predict(X)))==y.reshape(-1,1))))
+    print(100*np.mean((np.round(myMLP.predict(X)))==y.reshape(-1,1)))
 
 if __name__ == "__main__":
     main()
