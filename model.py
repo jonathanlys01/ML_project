@@ -56,48 +56,42 @@ class BaseMLP(torch.nn.Module):
         return F.sigmoid(x)
         
 
+    
+
 class TorchMLP(BaseEstimator, ClassifierMixin):
     """
     MLP implemented with PyTorch, to be used with sklearn pipelines
 
     Parameters
 
-    config: dict, contains the following keys:
-        n_epochs: int, number of epochs
-        bs: int, batch size
-        opt: str, one of "adam", "sgd"
-        lr: float, learning rate
-        architecture: list of int, sizes of the hidden layers
-        p: float, dropout probability
+    n_epochs: int, number of epochs
+    bs: int, batch size
+    opt: str, one of "adam", "sgd"
+    lr: float, learning rate
+    architecture: list of int, sizes of the hidden layers
+    p: float, dropout probability
     """
 
-    def __init__(self, config):
+    def __init__(self, n_epochs = 200, bs = 64, opt = "adam", lr = 1e-3, p = 0.05, architecture = [16, 32, 16], verbose = True):
         self.model = None
-        """self.device = torch.device("cpu") # no accelerator
-        if torch.backends.mps.is_available():
-            self.device = torch.device("mps")
-        elif torch.cuda.is_available():
-            self.device = torch.device("cuda:0")"""
-        # TODO : add working mps support
+        
+        
+        self.n_epochs = n_epochs
+        self.bs = bs
+        self.opt = opt
+        self.lr = lr
+        self.architecture = architecture
+        self.p = p
+        self.verbose = verbose
         
         self.device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-        assert all(config.get(key) is not None for key in ["n_epochs", "bs", "opt","lr","architecture","p"])
-
-        self.n_epochs = config.get("n_epochs")
-        self.lr = config.get("lr")
-        self.opt = config.get("opt")
-        self.bs = config.get("bs")
-        self.architecture = config.get("architecture")
-        self.p = config.get("p")
 
         self.fitted = False
-
-        self.config = config
         
         self.list_loss = []
 
-    def fit(self, X, y):
+    def fit(self, X, y,):
         # X (n_samples, dim)
         # y (n_samples, 1)
 
@@ -110,7 +104,7 @@ class TorchMLP(BaseEstimator, ClassifierMixin):
         assert X.shape[0] == y.shape[0]
 
         n_samples = X.shape[0]
-
+    
         self.model = BaseMLP(input_size=input_size, output_size=output_size, architecture=self.architecture, p=self.p)
         self.model = self.model.to(self.device)
 
@@ -119,11 +113,13 @@ class TorchMLP(BaseEstimator, ClassifierMixin):
         if self.opt == "adam":
             opt = torch.optim.Adam(lr=self.lr, params=self.model.parameters())
         elif self.opt == "sgd":
-            opt = torch.optim.SGD(lr=self.lr)
+            opt = torch.optim.SGD(lr=self.lr, params=self.model.parameters())
+        elif self.opt == "rmsprop":
+            opt = torch.optim.RMSprop(lr=self.lr, params=self.model.parameters())
         else:
-            raise NotImplementedError(self.opt, params= self.model.parameters())
+            raise NotImplementedError(f"{self.opt} not a valid optimizer")
         
-        pbar = tqdm(range(self.n_epochs))
+        pbar = tqdm(range(self.n_epochs)) if self.verbose else range(self.n_epochs)
         
         for i in pbar:
             batch_indexes = list(range(n_samples))
@@ -147,15 +143,18 @@ class TorchMLP(BaseEstimator, ClassifierMixin):
 
                 opt.step()
             self.list_loss.append(float(total_loss))
-            pbar.set_description(f"training loss : {float(total_loss):2f}")
+            if self.verbose:pbar.set_description(f"training loss : {float(total_loss):2f}")
 
         self.fitted = True
         return self
     def predict(self, X):
-        assert self.fitted
+        assert self.fitted, "model not fitted"
         x_tensor = torch.FloatTensor(X).to(self.device)
         with torch.inference_mode():
-            return self.model(x_tensor).detach().cpu().numpy()
+            return self.model(x_tensor).detach().cpu().numpy().reshape(-1)
+    def score(self, X, y):
+        assert self.fitted, "model not fitted"
+        return np.mean((np.round(self.predict(X))==y))
 
 def main():
     from sklearn.datasets import make_blobs
