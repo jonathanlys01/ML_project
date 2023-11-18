@@ -27,7 +27,7 @@ def int_encoding(df, columns):
         temp[column] = temp[column].map(dict(zip(temp[column].unique(), range(length))))
     return temp
 
-def fill_na(df,columns,strategy="median"):
+def fill_na(df : pd.DataFrame,columns,strategy="median"):
     """
     Fill missing values in columns with a given strategy
 
@@ -39,22 +39,23 @@ def fill_na(df,columns,strategy="median"):
     """
     temp = df.copy()
     for column in columns:
+        sample = temp[column].dropna()
         if strategy=="most":
-            most = temp[column].value_counts().index[0]
-            temp[column] = temp[column].fillna(most)
+            most = sample.value_counts().index[0]
+            temp[column].replace(np.nan, most, inplace=True)
         elif strategy=="mean": # warning : not recommended for one hot encoded categorical variables
-            mean = np.mean(temp[column])
-            temp[column] = temp[column].fillna(mean)
+            mean = np.mean(sample)
+            temp[column].replace(np.nan, mean, inplace=True)
         elif strategy=="median": 
-            median = np.median(temp[column])
-            temp[column] = temp[column].fillna(median)
+            median = np.median(sample)
+            temp[column].replace(np.nan, median, inplace=True)
         elif strategy=="zero":
-            temp[column] = temp[column].fillna(0)
+            temp[column].replace(np.nan, 0, inplace=True)
         else:
             raise NotImplementedError(f"{strategy} not a valid strategy)")
     return temp
 
-def train_test_split(df, train_split=0.7):
+def train_test_split(df:pd.DataFrame, train_split=0.7):
     """
     Split a dataframe into train and test sets
 
@@ -77,11 +78,11 @@ def train_test_split(df, train_split=0.7):
     train_indices = indices[:int(train_split*len(indices))]
     test_indices = indices[int(train_split*len(indices)):]
 
-    train_df = df.iloc[train_indices]
-    test_df = df.iloc[test_indices]
+    train_df = df.loc[train_indices]
+    test_df = df.loc[test_indices]
     return train_df, test_df
 
-def normalize(df, scaler):
+def normalize(df, scaler, fitted=False):
     """
     Normalize a dataframe using a given scaler
 
@@ -89,6 +90,7 @@ def normalize(df, scaler):
 
     df: pandas.DataFrame
     scaler: sklearn.preprocessing scaler
+    fitted: bool, if True, fit the scaler on the dataframe
 
     Returns
 
@@ -101,12 +103,33 @@ def normalize(df, scaler):
     
     col = temp.columns
 
-    temp = pd.DataFrame(scaler.fit_transform(temp))
+    if fitted:
+        scaler.fit(temp)
+
+    temp = pd.DataFrame(scaler.transform(temp))
 
     temp.columns = col
-    temp["class"] = df["class"]
+    temp.index = df.index
+    temp["class"] = df["class"].copy()
 
     return temp, scaler
+
+def get_X_y(df:pd.DataFrame):
+    """
+    Split a dataframe into features and target
+
+    Parameters
+
+    df: pandas.DataFrame
+
+    Returns
+
+    X: numpy.ndarray, features
+    y: numpy.ndarray, target
+    """
+    X = df.drop(columns=["class"]).to_numpy()
+    y = df["class"].to_numpy()
+    return X, y
 
 def main():
     data_path = os.environ.get("DATA_FOLDER") if os.environ.get("DATA_FOLDER") != "" else os.path.join(os.getcwd(), "data") 
