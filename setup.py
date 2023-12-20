@@ -36,7 +36,15 @@ print("Formatting data...")
 bank_ds = pd.read_csv(os.environ.get("BANK_DATA_PATH"), sep=",", header=None)
 bank_ds.columns = ["variance", "skewness", "curtosis", "entropy", "class"] # missing column names
 
-kidney_ds = pd.read_csv(os.environ.get("KIDNEY_DATA_PATH"), index_col=0)
+# replace \t with nothing
+with open(os.environ.get("KIDNEY_DATA_PATH"), "r") as f:
+    temp = f.readlines()
+    temp = [x.replace("\t", "") for x in temp]
+with open(os.path.join(data_folder, "kidney.csv"), "w") as f:
+    f.writelines(temp)
+
+kidney_ds = pd.read_csv(os.path.join(data_folder, "kidney.csv"), sep=",")
+
 kidney_ds.rename(columns={"classification": "class"}, inplace=True)
 kidney_ds["temp_class"] = kidney_ds["class"].map(lambda x : "ckd" if "not" not in x else "notckd")
 # for some reason, there were some instances of ckt\t instead of ckt
