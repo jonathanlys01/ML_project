@@ -27,13 +27,19 @@ Project in the introduction to the theory and practice of ML course for Mathemat
 ## What we do :
 - Import the dataset
 - Clean the data, perform pre-processing
-  - Replace missing values by average or median values
+  - Replace missing values by average or median values : median
   - Center and normalize the data
 - Split the dataset
   - Split between training set and test set
   - Split the training set for cross-validation
-- Train the model (including feature selection)
+- Train the model (including feature selection) : PCA
 - Validate the model
+
+We have decided to modify the method of implementation, to simplify it and have one main function for each .py file.
+The implementation with grid search has led us to make this choice.
+One .py is for the preprocessing, another for the setup, and one for the models.
+We have incorporated a unit test within the 'model' module of our code. When running python3 model.py, we generate a toy dataset for classification purposes. We also perform feature visualization and selection.
+
 
 
 
