@@ -7,7 +7,9 @@ from tqdm import tqdm
 
 import numpy as np
 
-from sklearn.datasets import make_blobs
+import time
+
+from sklearn.model_selection import GridSearchCV
 
 
 class BaseMLP(torch.nn.Module):
@@ -155,6 +157,16 @@ class TorchMLP(BaseEstimator, ClassifierMixin):
     def score(self, X, y):
         assert self.fitted, "model not fitted"
         return np.mean((np.round(self.predict(X))==y))
+    
+def train(dataset, model_list, configs, inputs):
+    for model in model_list:
+        print(model.__class__.__name__)
+        start = time.time()
+        grid = GridSearchCV(model, configs[model.__class__.__name__], cv=5, verbose=0, n_jobs=-1)
+        grid.fit(inputs[dataset]["X_train"], inputs[dataset]["y_train"])
+        print(f"Best : {grid.best_params_} with score {grid.best_score_:0.3f} (in {time.time()-start:0.3f}s)")
+        print(f"Test score : {grid.score(inputs[dataset]['X_test'], inputs[dataset]['y_test']):0.3f}")
+        print()
 
 def main():
     from sklearn.datasets import make_blobs
@@ -167,14 +179,14 @@ def main():
     opt = "adam",
     lr = 1e-3,
     architecture = [16, 32, 16],
-    p = 0.05
+    p = 0.2
     )
 
-    myMLP = TorchMLP(config=config)
+    myMLP = TorchMLP(**config)
 
     myMLP.fit(X, y)
 
-    print(print(100*np.mean((np.round(myMLP.predict(X)))==y.reshape(-1,1))))
+    print(myMLP.score(X, y))
 
 if __name__ == "__main__":
     main()
