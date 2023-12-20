@@ -20,6 +20,13 @@ Project in the introduction to the theory and practice of ML course for Mathemat
 
 ---
 
+## Authors:
+- Jules DECAESTECKER
+- Ella FERNANDEZ
+- Frédéric LIN
+- Jonathan LYS
+
+
 ## Datasets
 - [Banknote Authentication Dataset](https://archive.ics.uci.edu/dataset/267/banknote+authentication)
 
