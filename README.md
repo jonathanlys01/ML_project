@@ -22,7 +22,12 @@ Project in the introduction to the theory and practice of ML course for Mathemat
 
 ## Datasets
 - [Banknote Authentication Dataset](https://archive.ics.uci.edu/dataset/267/banknote+authentication)
+
+Data was extracted from images of genuine and forged banknote-like specimens. For digitization, an industrial camera commonly employed for print inspection was utilized. The final images measure 400x400 pixels. Grayscale pictures with a resolution of approximately 660 dpi were obtained, taking into consideration the object lens and distance to the investigated object. Features were extracted from the images using the Wavelet Transform tool.
+
 - [Chronic Kidney Disease](https://www.kaggle.com/mansoordaku/ckdisease)
+
+This dataset can be used to predict the chronic kidney disease and it can be collected from the hospital nearly 2 months of period.
 
 ## What we do :
 - Import the dataset
