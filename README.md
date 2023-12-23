@@ -36,22 +36,36 @@ Data was extracted from images of genuine and forged banknote-like specimens. Fo
 
 This dataset can be used to predict the chronic kidney disease and it can be collected from the hospital nearly 2 months of period.
 
+## Notes
+In order to follow good practices, we have decided to use the following structure for our project:
+- `data/` : contains the datasets and is created by the ```setup.py``` script
+- `.env` : contains the environment variables (paths)
+- `model.py` : contains the custom models (TorchMLP)
+- `preprocessing.py` : contains the preprocessing functions (normalization, split)
+- `setup.py` : contains the setup functions (create the data folder and solve some format issues)
+- `test.ipynb` : contains the main code for the project
+
 ## What we do :
-- Import the dataset
+In the test.ipynb notebook, we have implemented the following steps:
+
+- Import the datasets
 - Clean the data, perform pre-processing
   - Replace missing values by average or median values : median
-  - Center and normalize the data
+  - Visualize the data
 - Split the dataset
   - Split between training set and test set
   - Split the training set for cross-validation
-- Train the model (including feature selection) : PCA
-- Validate the model
+  - Center and normalize the data. This is done after the split to avoid data leakage.
+- Train and test the models with no hyperparameter tuning
+- Perform PCA
+- Retrain the models via GridSearchCV for hyperparameter tuning
 
-We have decided to modify the method of implementation, to simplify it and have one main function for each .py file.
-The implementation with grid search has led us to make this choice.
-One .py is for the preprocessing, another for the setup, and one for the models.
-We have incorporated a unit test within the 'model' module of our code. When running python3 model.py, we generate a toy dataset for classification purposes. We also perform feature visualization and selection.
+We have decided to modify the method of implementation, for sake of simplicity, each file serves a specific purpose.
+The implementation with grid search has led us to make this choice, to separate the models and the preprocessing.
+One .py is for the preprocessing, another for the setup (this should be done before everything), and one for the models.
+We have incorporated a unit test within the 'model' module of our code. When running python3 model.py, we generate a toy dataset for classification purposes. 
 
+In the end, the best models are the SVC and the Torch MLP.
 
 
 
